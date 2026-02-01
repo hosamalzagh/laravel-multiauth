@@ -1,8 +1,31 @@
+# Dependencies
 /vendor
+/node_modules
 composer.phar
 composer.lock
-.DS_Store
+
+# IDE
 .idea
-.php_cs.cache
+.vscode
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
 .phpunit.result.cache
-/node_modules
+.phpunit.cache
+coverage/
+
+# Tools
+.php_cs.cache
+.php-cs-fixer.cache
+
+# Workbench (for local development only)
+/workbench
+
+# Build artifacts
+/build
+*.log

@@ -65,30 +65,30 @@ class MakeMultiAuthCommand extends Command
 
     protected function addGuard()
     {
-        $auth  = file_get_contents(config_path('auth.php'));
+        $auth = file_get_contents(config_path('auth.php'));
         $guard = $this->parseName()['{{singularClass}}'];
 
         $keys = [
-            'guards'    => [
+            'guards' => [
                 'preg_replace' => "/'guards'\s*=>\s*\[/",
                 'to_replace' => "'guards' => [",
-                'stub'       => file_get_contents("{$this->stub_path}/config/guards.stub"),
+                'stub' => file_get_contents("{$this->stub_path}/config/guards.stub"),
             ],
             'providers' => [
                 'preg_replace' => "/'providers'\s*=>\s*\[/",
                 'to_replace' => "'providers' => [",
-                'stub'       => file_get_contents("{$this->stub_path}/config/providers.stub"),
+                'stub' => file_get_contents("{$this->stub_path}/config/providers.stub"),
             ],
             'passwords' => [
                 'preg_replace' => "/'passwords'\s*=>\s*\[/",
                 'to_replace' => "'passwords' => [",
-                'stub'       => file_get_contents("{$this->stub_path}/config/passwords.stub"),
+                'stub' => file_get_contents("{$this->stub_path}/config/passwords.stub"),
             ],
         ];
 
         foreach ($keys as $key) {
             $compiled = strtr($key['stub'], $this->parseName());
-            $auth     = preg_replace($key['preg_replace'], $key['to_replace'] . $compiled, $auth);
+            $auth = preg_replace($key['preg_replace'], $key['to_replace'] . $compiled, $auth);
         }
 
         file_put_contents(config_path('auth.php'), $auth);
@@ -100,7 +100,7 @@ class MakeMultiAuthCommand extends Command
     protected function checkGuard()
     {
         $providers = array_keys(config('auth.providers'));
-        $name      = Str::plural($this->name);
+        $name = Str::plural($this->name);
 
         return in_array($name, $providers);
     }
@@ -108,8 +108,8 @@ class MakeMultiAuthCommand extends Command
     protected function publishControllers()
     {
         $stub_path = $this->stub_path . '/Controllers';
-        $name_map  = $this->parseName();
-        $guard     = $name_map['{{singularClass}}'];
+        $name_map = $this->parseName();
+        $guard = $name_map['{{singularClass}}'];
 
         $files = [
             'Auth/ForgotPasswordController',
@@ -128,7 +128,7 @@ class MakeMultiAuthCommand extends Command
         }
 
         foreach ($files as $file) {
-            $stub     = file_get_contents("{$stub_path}/{$file}.stub");
+            $stub = file_get_contents("{$stub_path}/{$file}.stub");
             $complied = strtr($stub, $name_map);
             file_put_contents("{$publish_path}/{$file}.php", $complied);
         }
@@ -139,10 +139,10 @@ class MakeMultiAuthCommand extends Command
 
     protected function publishRoutes()
     {
-        $stub_path    = $this->stub_path . '/routes';
-        $name_map     = $this->parseName();
+        $stub_path = $this->stub_path . '/routes';
+        $name_map = $this->parseName();
         $publish_path = base_path('routes');
-        $guard        = $name_map['{{singularSlug}}'];
+        $guard = $name_map['{{singularSlug}}'];
 
         if (app()->environment() == 'testing') {
             if (!file_exists(base_path('routes'))) {
@@ -157,7 +157,7 @@ class MakeMultiAuthCommand extends Command
             }
         }
 
-        $stub     = file_get_contents("{$stub_path}/routes.stub");
+        $stub = file_get_contents("{$stub_path}/routes.stub");
         $complied = strtr($stub, $name_map);
         file_put_contents("{$publish_path}/{$guard}.php", $complied);
         $this->info("Step 3. Routes for {$guard} is added to routes/{$guard}.php file \n");
@@ -168,6 +168,11 @@ class MakeMultiAuthCommand extends Command
     protected function registerRoutes()
     {
         $provider_path = app_path('Providers/RouteServiceProvider.php');
+
+        if (!file_exists($provider_path)) {
+            $this->warn("RouteServiceProvider not found. Please register routes manually.");
+            return $this;
+        }
 
         $provider = file_get_contents($provider_path);
         $name_map = $this->parseName();
@@ -180,7 +185,7 @@ class MakeMultiAuthCommand extends Command
         if (strpos($provider, $map)) {
             $this->error('Routes are already registered');
 
-            return;
+            return $this;
         }
 
         $map_call_bait = '$this->routes(function () {';
@@ -199,8 +204,8 @@ class MakeMultiAuthCommand extends Command
         $guard = $this->parseName()['{{singularSlug}}'];
 
         $views_path = resource_path('views/' . $guard);
-        $stub_path  = "{$this->stub_path}/views";
-        $views      = [
+        $stub_path = "{$this->stub_path}/views";
+        $views = [
             'home.blade',
             'layouts/app.blade',
             'auth/login.blade',
@@ -212,8 +217,8 @@ class MakeMultiAuthCommand extends Command
 
         foreach ($views as $view) {
             $stub_content = file_get_contents("{$stub_path}/{$view}.stub");
-            $complied     = strtr($stub_content, $this->parseName());
-            $dir          = dirname("{$views_path}/{$view}");
+            $complied = strtr($stub_content, $this->parseName());
+            $dir = dirname("{$views_path}/{$view}");
             if (!is_dir($dir)) {
                 mkdir($dir, 0755, true);
             }
@@ -242,8 +247,8 @@ class MakeMultiAuthCommand extends Command
     {
         $stub_content = file_get_contents("{$this->stub_path}/migration.stub");
 
-        $compiled       = strtr($stub_content, $this->parseName());
-        $signature      = date('Y_m_d_His');
+        $compiled = strtr($stub_content, $this->parseName());
+        $signature = date('Y_m_d_His');
         $migration_path = database_path("migrations/{$signature}_create_{$this->parseName()['{{pluralSnake}}']}_table.php");
 
         file_put_contents($migration_path, $compiled);
@@ -255,8 +260,8 @@ class MakeMultiAuthCommand extends Command
     protected function publishModel()
     {
         $stub_content = file_get_contents("{$this->stub_path}/model.stub");
-        $compiled     = strtr($stub_content, $this->parseName());
-        $model_path   = app_path($this->parseName()['{{singularClass}}'] . '.php');
+        $compiled = strtr($stub_content, $this->parseName());
+        $model_path = app_path($this->parseName()['{{singularClass}}'] . '.php');
 
         file_put_contents($model_path, $compiled);
         $this->info("Step 8. Model for {$this->name} is added to App\\{$this->name}.php \n");
@@ -299,6 +304,11 @@ class MakeMultiAuthCommand extends Command
     {
         $kernel_path = app_path('Http/Kernel.php');
 
+        if (!file_exists($kernel_path)) {
+            $this->warn("Http/Kernel.php not found. Please register middleware manually in bootstrap/app.php.");
+            return $this;
+        }
+
         $kernel = file_get_contents($kernel_path);
 
         // Route Middleware
@@ -323,9 +333,9 @@ class MakeMultiAuthCommand extends Command
         $stub1 = file_get_contents($this->stub_path . '/Notifications/ResetPassword.stub');
         $stub2 = file_get_contents($this->stub_path . '/Notifications/VerifyEmail.stub');
 
-        $notification1      = strtr($stub1, $this->parseName());
-        $notification2      = strtr($stub2, $this->parseName());
-        $name               = $this->parseName()['{{singularClass}}'];
+        $notification1 = strtr($stub1, $this->parseName());
+        $notification2 = strtr($stub2, $this->parseName());
+        $name = $this->parseName()['{{singularClass}}'];
         $notification_path1 = app_path("/Notifications/{$name}/{$name}ResetPassword.php");
         $notification_path2 = app_path("/Notifications/{$name}/{$name}VerifyEmail.php");
 
@@ -356,15 +366,15 @@ class MakeMultiAuthCommand extends Command
         }
 
         return [
-            '{{pluralCamel}}'   => Str::plural(Str::camel($name)),
-            '{{pluralSlug}}'    => Str::plural(Str::slug($name)),
-            '{{pluralSnake}}'   => Str::plural(Str::snake($name)),
-            '{{pluralClass}}'   => Str::plural(Str::studly($name)),
+            '{{pluralCamel}}' => Str::plural(Str::camel($name)),
+            '{{pluralSlug}}' => Str::plural(Str::slug($name)),
+            '{{pluralSnake}}' => Str::plural(Str::snake($name)),
+            '{{pluralClass}}' => Str::plural(Str::studly($name)),
             '{{singularCamel}}' => Str::singular(Str::camel($name)),
-            '{{singularSlug}}'  => Str::singular(Str::slug($name)),
+            '{{singularSlug}}' => Str::singular(Str::slug($name)),
             '{{singularSnake}}' => Str::singular(Str::snake($name)),
             '{{singularClass}}' => Str::singular(Str::studly($name)),
-            '{{namespace}}'     => $this->getNamespace(),
+            '{{namespace}}' => $this->getNamespace(),
         ];
     }
 
@@ -376,8 +386,6 @@ class MakeMultiAuthCommand extends Command
      */
     protected function getNamespace()
     {
-        $namespace = Container::getInstance()->getNamespace();
-
-        return rtrim($namespace, '\\');
+        return app()->getNamespace();
     }
 }

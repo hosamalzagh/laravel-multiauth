@@ -5,7 +5,6 @@ namespace CobraProjects\Multiauth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Database\Eloquent\Factory;
 use CobraProjects\Multiauth\Console\Commands\Install;
 use CobraProjects\Multiauth\Console\Commands\RoleCmd;
 use CobraProjects\Multiauth\Console\Commands\SeedCmd;
@@ -39,19 +38,10 @@ class MultiauthServiceProvider extends ServiceProvider
     public function register()
     {
         if ($this->canHaveAdminBackend()) {
-            $this->loadFactories();
             $this->loadMiddleware();
-            $this->registerExceptionHandler();
+            // $this->registerExceptionHandler();
             app()->register(AuthServiceProvider::class);
         }
-    }
-
-    protected function loadFactories()
-    {
-        $appFactories = scandir(database_path('/factories'));
-        $factoryPath  = !in_array('AdminFactory.php', $appFactories) ? __DIR__ . '/factories' : database_path('/factories');
-
-        $this->app->make(Factory::class)->load($factoryPath);
     }
 
     /**
@@ -74,15 +64,15 @@ class MultiauthServiceProvider extends ServiceProvider
     private function routeConfiguration()
     {
         return [
-            'namespace'  => "CobraProjects\Multiauth\Http\Controllers",
+            'namespace' => "CobraProjects\Multiauth\Http\Controllers",
             'middleware' => 'web',
-            'prefix'     => config('multiauth.prefix', 'admin'),
+            'prefix' => config('multiauth.prefix', 'admin'),
         ];
     }
 
     protected function loadRoutesFrom($path)
     {
-        $prefix   = config('multiauth.prefix', 'admin');
+        $prefix = config('multiauth.prefix', 'admin');
         $routeDir = base_path('routes');
         if (file_exists($routeDir)) {
             $appRouteDir = scandir($routeDir);
@@ -160,7 +150,7 @@ class MultiauthServiceProvider extends ServiceProvider
     {
         Blade::if('admin', function ($role) {
             if (!auth('admin')->check()) {
-                return  false;
+                return false;
             }
             $role = explode(',', $role);
             $role[] = 'super';
@@ -172,7 +162,7 @@ class MultiauthServiceProvider extends ServiceProvider
 
         Blade::if('permitTo', function ($permission) {
             if (!auth('admin')->check()) {
-                return  false;
+                return false;
             }
             $permission = explode(',', $permission);
             $permissions = auth('admin')->user()->allPermissions();
@@ -186,7 +176,7 @@ class MultiauthServiceProvider extends ServiceProvider
 
         Blade::if('permitToParent', function ($permission) {
             if (!auth('admin')->check()) {
-                return  false;
+                return false;
             }
             $permission = explode(',', $permission);
             $permissions = auth('admin')->user()->allPermissions();

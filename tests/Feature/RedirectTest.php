@@ -11,8 +11,13 @@ class RedirectTest extends TestCase
     {
         app()['config']->set('multiauth.redirect_after_login', '/newPath');
 
+        \Illuminate\Support\Facades\Route::get('/newPath', function () {
+            return 'new path';
+        })->name('new.path');
+        app()['config']->set('multiauth.redirect_after_login', 'new.path');
+
         $admin = $this->createAdmin();
-        $res   = $this->post(route('admin.login'), ['email' => $admin->email, 'password' => 'secret']);
+        $res = $this->post(route('admin.login'), ['email' => $admin->email, 'password' => 'secret']);
         $res->assertRedirect('/newPath');
     }
 }

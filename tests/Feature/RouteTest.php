@@ -14,7 +14,7 @@ class RouteTest extends TestCase
     {
         $this->withExceptionHandling();
         $this->logInAdmin();
-        $this->get('/admin/home')->assertOk();
+        $this->get(route('admin.home'))->assertOk();
         $this->get('/admin/invalidRoute')->assertStatus(404);
     }
 }

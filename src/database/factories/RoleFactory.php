@@ -1,11 +1,18 @@
 <?php
 
-/* @var \Illuminate\Database\Eloquent\Factory $factory */
+namespace CobraProjects\Multiauth\Database\Factories;
 
 use CobraProjects\Multiauth\Model\Role;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-$factory->define(Role::class, function (Faker\Generator $faker) {
-    return [
-        'name' => $faker->word,
-    ];
-});
+class RoleFactory extends Factory
+{
+    protected $model = Role::class;
+
+    public function definition()
+    {
+        return [
+            'name' => $this->faker->word,
+        ];
+    }
+}

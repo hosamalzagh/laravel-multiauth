@@ -5,12 +5,12 @@ namespace CobraProjects\Multiauth\Tests\Feature;
 use Illuminate\Support\Facades\Hash;
 use CobraProjects\Multiauth\Tests\TestCase;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+
 use CobraProjects\Multiauth\Notifications\AdminResetPasswordNotification;
 
 class ResetPasswordTest extends TestCase
 {
-    use DatabaseMigrations;
+
 
     /**
      * @test
@@ -49,10 +49,10 @@ class ResetPasswordTest extends TestCase
             $token = $notification->token;
             $this->assertTrue(Hash::check('secret', $admin->password));
             $res = $this->post(route('admin.password.request'), [
-                'email'                 => $admin->email,
-                'password'              => 'newpassword',
+                'email' => $admin->email,
+                'password' => 'newpassword',
                 'password_confirmation' => 'newpassword',
-                'token'                 => $token,
+                'token' => $token,
             ]);
 
             $this->assertTrue(Hash::check('newpassword', $admin->fresh()->password));
@@ -67,7 +67,7 @@ class ResetPasswordTest extends TestCase
         $admin = $this->logInAdmin();
         $this->get(route('admin.password.change'))
             ->assertOk()
-            ->assertSee('Old Password');
+            ->assertSee('كلمة المرور الحالية');
     }
 
     /** @test */
@@ -75,9 +75,9 @@ class ResetPasswordTest extends TestCase
     {
         $admin = $this->logInAdmin();
         $this->post(route('admin.password.change'), [
-            'oldPassword'              => 'secret123',
-            'password'                 => '123456789',
-            'password_confirmation'    => '123456789',
+            'oldPassword' => 'secret123',
+            'password' => '123456789',
+            'password_confirmation' => '123456789',
         ])
             ->assertRedirect(route('admin.home'))
             ->assertSessionHas('message');

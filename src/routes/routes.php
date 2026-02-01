@@ -9,7 +9,7 @@ Route::POST('/logout', 'LoginController@logout')->name('admin.logout');
 // Password Resets
 Route::POST('/password/email', 'ForgotPasswordController@sendResetLinkEmail')->name('admin.password.email');
 Route::GET('/password/reset', 'ForgotPasswordController@showLinkRequestForm')->name('admin.password.request');
-Route::POST('/password/reset', 'ResetPasswordController@reset');
+Route::POST('/password/reset', 'ResetPasswordController@reset')->name('admin.password.update');
 Route::GET('/password/reset/{token}', 'ResetPasswordController@showResetForm')->name('admin.password.reset');
 Route::GET('/password/change', 'AdminController@showChangePasswordForm')->name('admin.password.change');
 Route::POST('/password/change', 'AdminController@changePassword');

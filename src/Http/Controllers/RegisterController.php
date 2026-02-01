@@ -46,7 +46,7 @@ class RegisterController extends Controller
     public function __construct()
     {
         $this->middleware('auth:admin');
-        $this->middleware('permitTo:CreateAdmin')->only('showRegistrationForm', 'create');
+        $this->middleware('permitTo:CreateAdmin')->only('showRegistrationForm', 'register');
         $this->middleware('permitTo:UpdateAdmin')->only('edit', 'update');
         $this->middleware('permitTo:DeleteAdmin')->only('destroy');
     }
@@ -76,7 +76,7 @@ class RegisterController extends Controller
     {
         $admin = new Admin();
 
-        $fields           = $this->tableFields();
+        $fields = $this->tableFields();
         $data['password'] = bcrypt($data['password']);
         foreach ($fields as $field) {
             if (isset($data[$field])) {

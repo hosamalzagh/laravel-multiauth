@@ -33,7 +33,7 @@ class PermissionTest extends TestCase
     /** @test */
     public function api_can_store_new_permission()
     {
-        $permission = factory(Permission::class)->make(['name' => 'Laravel']);
+        $permission = Permission::factory()->make(['name' => 'Laravel']);
         $this->postJson(route('permission.store'), $permission->toArray())
             ->assertStatus(201);
         $this->assertDatabaseHas('Permissions', ['name' => 'Laravel']);

@@ -15,8 +15,8 @@ class PermissionTest extends TestCase
     /** @test */
     public function it_belongs_to_many_role()
     {
-        $role        = factory(Role::class, 2)->create();
-        $permission  = factory(Permission::class)->create();
+        $role = Role::factory(2)->create();
+        $permission = Permission::factory()->create();
         $permission->roles()->attach($role->pluck('id'));
         $this->assertInstanceOf(Role::class, $permission->roles->first());
     }
@@ -24,8 +24,8 @@ class PermissionTest extends TestCase
     /** @test */
     public function it_belongs_many_to_admin()
     {
-        $admin       = factory(Admin::class)->create();
-        $permission  = factory(Permission::class)->create();
+        $admin = Admin::factory()->create();
+        $permission = Permission::factory()->create();
         $permission->admins()->attach($admin->pluck('id'));
         $this->assertInstanceOf(Admin::class, $permission->admins->first());
     }

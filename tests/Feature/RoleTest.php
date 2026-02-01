@@ -54,7 +54,7 @@ class RoleTest extends TestCase
      */
     public function a_super_admin_can_only_see_edit_page_for_role()
     {
-        $role = factory(Role::class)->create(['name' => 'editr']);
+        $role = Role::factory()->create(['name' => 'editr']);
         $this->get(route('admin.role.edit', $role->id))
             ->assertStatus(200);
     }
@@ -64,7 +64,7 @@ class RoleTest extends TestCase
      */
     public function a_super_admin_can_only_update_a_role()
     {
-        $role = factory(Role::class)->create(['name' => 'editr']);
+        $role = Role::factory()->create(['name' => 'editr']);
         $this->assertDatabaseHas('roles', ['name' => $role->name]);
         $this->patch(route('admin.role.update', $role->id), ['name' => 'editor'])
             ->assertStatus(302)
@@ -77,7 +77,7 @@ class RoleTest extends TestCase
      */
     public function a_super_admin_can_only_delete_a_role()
     {
-        $role = factory(Role::class)->create(['name' => 'editor']);
+        $role = Role::factory()->create(['name' => 'editor']);
         $this->assertDatabaseHas('roles', ['name' => $role->name]);
         $this->delete(route('admin.role.delete', $role->id))->assertStatus(302);
         $this->assertDatabaseMissing('roles', ['name' => 'editor']);

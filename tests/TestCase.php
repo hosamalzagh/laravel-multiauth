@@ -17,7 +17,12 @@ class TestCase extends BaseTestCase
         $this->artisan('migrate', ['--database' => 'testing']);
         $this->loadLaravelMigrations(['--database' => 'testing']);
         $this->loadMigrationsFrom(__DIR__ . '/../src/database/migrations');
-        $this->withFactories(__DIR__ . '/../src/database/factories');
+        // Manually create password_resets table for legacy compatibility in tests
+        $this->app['db']->connection()->getSchemaBuilder()->create('password_resets', function ($table) {
+            $table->string('email')->index();
+            $table->string('token');
+            $table->timestamp('created_at')->nullable();
+        });
     }
 
     protected function getEnvironmentSetUp($app)
@@ -26,9 +31,9 @@ class TestCase extends BaseTestCase
         $app['config']->set('database.default', 'testing');
         $app['config']->set('multiauth.registration_notification_email', false);
         $app['config']->set('database.connections.testing', [
-            'driver'   => 'sqlite',
+            'driver' => 'sqlite',
             'database' => ':memory:',
-            'prefix'   => '',
+            'prefix' => '',
         ]);
     }
 
@@ -47,18 +52,18 @@ class TestCase extends BaseTestCase
 
     public function createAdmin($args = [])
     {
-        return factory(Admin::class)->create($args);
+        return Admin::factory()->create($args);
     }
 
     public function create_permission($args = [], $num = null)
     {
-        return factory(Permission::class, $num)->create($args);
+        return Permission::factory($num)->create($args);
     }
 
     public function loginSuperAdmin($args = [])
     {
-        $super = factory(Admin::class)->create($args);
-        $role  = factory(Role::class)->create(['name' => 'super']);
+        $super = Admin::factory()->create($args);
+        $role = Role::factory()->create(['name' => 'super']);
         $this->createAndLinkPermissionsTo($role);
         $super->roles()->attach($role);
         $this->actingAs($super, 'admin');
@@ -68,11 +73,11 @@ class TestCase extends BaseTestCase
 
     protected function createAndLinkPermissionsTo($role)
     {
-        $models        = ['Admin', 'Role'];
-        $tasks         = ['Create', 'Read', 'Update', 'Delete'];
+        $models = ['Admin', 'Role'];
+        $tasks = ['Create', 'Read', 'Update', 'Delete'];
         foreach ($tasks as $task) {
             foreach ($models as $model) {
-                $name       = "{$task}{$model}";
+                $name = "{$task}{$model}";
                 $permission = Permission::create(['name' => $name, 'parent' => $model]);
                 $role->addPermission([$permission->id]);
             }

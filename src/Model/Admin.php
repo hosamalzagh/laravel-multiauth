@@ -3,13 +3,20 @@
 namespace CobraProjects\Multiauth\Model;
 
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use CobraProjects\Multiauth\Database\Factories\AdminFactory;
 use CobraProjects\Multiauth\Traits\hasPermissions;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use CobraProjects\Multiauth\Notifications\AdminResetPasswordNotification;
 
 class Admin extends Authenticatable
 {
-    use Notifiable, hasPermissions;
+    use Notifiable, hasPermissions, HasFactory;
+
+    protected static function newFactory()
+    {
+        return AdminFactory::new();
+    }
 
     protected $casts = ['active' => 'boolean'];
 
@@ -43,6 +50,7 @@ class Admin extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password',
+        'remember_token',
     ];
 }

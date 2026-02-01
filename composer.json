@@ -11,7 +11,16 @@
     "multi auth",
     "laravel permissions",
     "laravel roles permissions",
-    "laravel acl"
+    "laravel multiauth",
+    "multiauth",
+    "cobraprojects",
+    "admin auth",
+    "multi auth",
+    "laravel permissions",
+    "laravel roles permissions",
+    "laravel acl",
+    "laravel 11",
+    "laravel 12"
   ],
   "authors": [
     {
@@ -21,8 +30,14 @@
   ],
   "minimum-stability": "dev",
   "require": {
-    "laravel/legacy-factories": "^v1.3.0",
-    "laravel/ui": "v4.2.0"
+    "php": "^8.2",
+    "illuminate/support": "^10.0|^11.0|^12.0",
+    "laravel/ui": "^4.0"
+  },
+  "require-dev": {
+    "orchestra/testbench": "^8.0|^9.0|^10.0",
+    "phpunit/phpunit": "^10.0|^11.0",
+    "mockery/mockery": "^1.6"
   },
   "autoload": {
     "psr-4": {

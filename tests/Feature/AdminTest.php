@@ -40,7 +40,7 @@ class AdminTest extends TestCase
     {
         $this->get(route('admin.register'))
             ->assertStatus(200)
-            ->assertSee('Register New Admin');
+            ->assertSee('اضافة مستخدم جديد');
     }
 
     /**
@@ -51,7 +51,7 @@ class AdminTest extends TestCase
         $this->logInAdmin();
         $this->get(route('admin.register'))
             ->assertStatus(302)
-            ->assertRedirect(route('admin.home'));
+            ->assertRedirect(route('admin.login'));
     }
 
     /**
@@ -74,7 +74,7 @@ class AdminTest extends TestCase
     {
         $this->logInAdmin();
         $response = $this->createNewAdminWithRole();
-        $response->assertStatus(302)->assertRedirect(route('admin.home'));
+        $response->assertStatus(302)->assertRedirect(route('admin.login'));
         $this->assertDatabaseMissing('admins', ['email' => 'sarthak@gmail.com']);
     }
 
@@ -96,7 +96,7 @@ class AdminTest extends TestCase
         $newadmin = $this->createAdmin();
         $this->get(route('admin.show'))
             ->assertDontSee($newadmin->name)
-            ->assertRedirect(route('admin.home'));
+            ->assertRedirect(route('admin.login'));
     }
 
     /**
@@ -105,7 +105,7 @@ class AdminTest extends TestCase
     public function a_super_admin_can_delete_admin()
     {
         $admin = $this->createAdmin();
-        $role  = factory(Role::class)->create(['name' => 'editor']);
+        $role = Role::factory()->create(['name' => 'editor']);
         $admin->roles()->attach($role);
         $this->delete(route('admin.delete', $admin->id))->assertRedirect(route('admin.show'));
         $this->assertDatabaseMissing('admins', ['id' => $admin->id]);
@@ -117,7 +117,7 @@ class AdminTest extends TestCase
     public function a_super_admin_can_see_edit_page_for_admin()
     {
         $admin = $this->createAdmin();
-        $this->get(route('admin.edit', $admin->id))->assertSee("Edit details of {$admin->name}");
+        $this->get(route('admin.edit', $admin->id))->assertSee("تعديل المستخدم {$admin->name}");
     }
 
     /**
@@ -126,11 +126,11 @@ class AdminTest extends TestCase
     public function a_super_admin_can_update_admin_details()
     {
         $admin = $this->createAdmin();
-        $role  = factory(Role::class)->create(['name' => 'editor']);
+        $role = Role::factory()->create(['name' => 'editor']);
         $admin->roles()->attach($role);
         $newDetails = [
-            'name'    => 'newname',
-            'email'   => 'newadmin@gmail.com',
+            'name' => 'newname',
+            'email' => 'newadmin@gmail.com',
             'role_id' => [1, 2],
         ];
         $this->patch(route('admin.update', $admin->id), $newDetails)->assertRedirect(route('admin.show'));
@@ -149,27 +149,27 @@ class AdminTest extends TestCase
 
     protected function createNewAdminWithRole()
     {
-        $role = factory(Role::class)->create(['name' => 'editor']);
+        $role = Role::factory()->create(['name' => 'editor']);
 
         return $this->post(route('admin.register'), [
-            'name'                  => 'sarthak',
-            'email'                 => 'sarthak@gmail.com',
-            'password'              => 'secret123',
+            'name' => 'sarthak',
+            'email' => 'sarthak@gmail.com',
+            'password' => 'secret123',
             'password_confirmation' => 'secret123',
-            'role_id'               => $role->id,
+            'role_id' => $role->id,
         ]);
     }
 
     /** @test */
     public function a_super_admin_can_only_see_master_and_role_drop_down()
     {
-        $this->get(route('admin.home'))->assertSee('Roles');
+        $this->get(route('admin.home'))->assertSee('الوظائف');
     }
 
     /** @test */
     public function a_normal_admin_can_not_see_master_and_role_drop_down()
     {
         $this->logInAdmin();
-        $this->get(route('admin.home'))->assertDontSee('Roles');
+        $this->get(route('admin.home'))->assertDontSee('الوظائف');
     }
 }

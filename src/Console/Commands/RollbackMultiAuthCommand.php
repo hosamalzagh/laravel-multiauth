@@ -70,14 +70,14 @@ class RollbackMultiAuthCommand extends Command
 
     protected function unPublishGuard()
     {
-        $auth  = file_get_contents(config_path('auth.php'));
+        $auth = file_get_contents(config_path('auth.php'));
         $guard = $this->parseName()['{{singularSnake}}'];
 
         for ($i = 0; $i < 3; $i++) {
             preg_match_all("/'{$guard}s?'\s*=>\s*\[\r?\n?(.*\n){2}.*(\r?\n.*)?\],/", $auth, $match);
             $auth = str_replace($match[0][0], '', $auth);
         }
-        
+
         file_put_contents(config_path('auth.php'), $auth);
         $this->error("Step 1. {$guard} Guard is removed from config/auth.php file \n");
 
@@ -88,12 +88,12 @@ class RollbackMultiAuthCommand extends Command
     {
         try {
             $guard = $this->parseName()['{{singularClass}}'];
-            $path  = app_path("/Http/Controllers/{$guard}");
+            $path = app_path("/Http/Controllers/{$guard}");
             array_map('unlink', glob("{$path}/Auth/*.php"));
             array_map('unlink', glob("{$path}/*.php"));
             rmdir("$path/Auth");
             rmdir($path);
-        } catch (\Exception$ex) {
+        } catch (\Exception $ex) {
             throw new \RuntimeException($ex->getMessage());
         }
         $this->error("Step 2.  Controllers for {$guard} is rollbacked from App\Http\Controller\Student \n");
@@ -106,7 +106,7 @@ class RollbackMultiAuthCommand extends Command
         try {
             unlink(base_path("routes/{$this->name}.php"));
             $this->error("Step 3. Routes for {$this->name} is rollbacked from routes directory \n");
-        } catch (\Exception$e) {
+        } catch (\Exception $e) {
             $this->error($e->getMessage());
         }
 
@@ -116,15 +116,20 @@ class RollbackMultiAuthCommand extends Command
     protected function unRegisterRoutes()
     {
         $provider_path = app_path('Providers/RouteServiceProvider.php');
-        $provider      = file_get_contents($provider_path);
+
+        if (!file_exists($provider_path)) {
+            $this->warn("RouteServiceProvider not found. Assuming routes were manually removed.");
+            return $this;
+        }
+        $provider = file_get_contents($provider_path);
 
         $stubs = [
             $this->stub_path . '/routes/map.stub',
             $this->stub_path . '/routes/map_call.stub',
         ];
         foreach ($stubs as $stub) {
-            $map      = file_get_contents($stub);
-            $map      = strtr($map, $this->parseName());
+            $map = file_get_contents($stub);
+            $map = strtr($map, $this->parseName());
             $provider = str_replace($map, '', $provider);
         }
 
@@ -136,9 +141,9 @@ class RollbackMultiAuthCommand extends Command
 
     protected function rollbackViews()
     {
-        $guard      = strtolower($this->parseName()['{{singularClass}}']);
+        $guard = strtolower($this->parseName()['{{singularClass}}']);
         $views_path = resource_path("views/{$guard}");
-        $dirs       = ['/auth/passwords/', '/auth/', '/layouts/', '/'];
+        $dirs = ['/auth/passwords/', '/auth/', '/layouts/', '/'];
         foreach ($dirs as $dir) {
             array_map('unlink', glob("{$views_path}{$dir}*.php"));
             rmdir($views_path . $dir);
@@ -155,7 +160,7 @@ class RollbackMultiAuthCommand extends Command
         try {
             unlink($factory);
             $this->error("Step 6. Factory for {$this->name} is removed from database\\factories directory \n");
-        } catch (\Exception$e) {
+        } catch (\Exception $e) {
             $this->error($e->getMessage());
         }
 
@@ -164,9 +169,9 @@ class RollbackMultiAuthCommand extends Command
 
     protected function removeMigration()
     {
-        $guard          = $this->parseName()['{{pluralSlug}}'];
+        $guard = $this->parseName()['{{pluralSlug}}'];
         $migration_path = database_path('migrations');
-        $files          = glob("{$migration_path}/*.php");
+        $files = glob("{$migration_path}/*.php");
         foreach ($files as $file) {
             if (Str::contains($file, "create_{$guard}_table")) {
                 unlink($file);
@@ -189,7 +194,7 @@ class RollbackMultiAuthCommand extends Command
     protected function removeMiddleware()
     {
         $guard = $this->parseName()['{{singularClass}}'];
-        $path  = app_path('Http/Middleware');
+        $path = app_path('Http/Middleware');
         unlink("{$path}/RedirectIf{$guard}.php");
         unlink("{$path}/RedirectIfNot{$guard}.php");
         unlink("{$path}/EnsureEmailIsVerifiedOf{$guard}.php");
@@ -200,8 +205,13 @@ class RollbackMultiAuthCommand extends Command
 
     protected function unRegisterMiddleware()
     {
-        $kernel = file_get_contents(app_path('Http/Kernel.php'));
-        $guard  = $this->parseName()['{{singularSnake}}'];
+        $path = app_path('Http/Kernel.php');
+        if (!file_exists($path)) {
+            $this->warn("Http/Kernel.php not found. Assuming middleware was manually removed.");
+            return $this;
+        }
+        $kernel = file_get_contents($path);
+        $guard = $this->parseName()['{{singularSnake}}'];
         preg_match_all("/'{$guard}.+::class,\s+/", $kernel, $match);
         foreach ($match[0] as $match) {
             $kernel = str_replace($match, '', $kernel);
@@ -222,7 +232,7 @@ class RollbackMultiAuthCommand extends Command
 
     protected function removeNotification()
     {
-        $name              = $this->parseName()['{{singularClass}}'];
+        $name = $this->parseName()['{{singularClass}}'];
         $notification_path = app_path("/Notifications/{$name}");
         unlink("{$notification_path}/{$name}ResetPassword.php");
         unlink("{$notification_path}/{$name}VerifyEmail.php");
@@ -247,15 +257,15 @@ class RollbackMultiAuthCommand extends Command
         }
 
         return [
-            '{{pluralCamel}}'   => Str::plural(Str::camel($name)),
-            '{{pluralSlug}}'    => Str::plural(Str::slug($name)),
-            '{{pluralSnake}}'   => Str::plural(Str::snake($name)),
-            '{{pluralClass}}'   => Str::plural(Str::studly($name)),
+            '{{pluralCamel}}' => Str::plural(Str::camel($name)),
+            '{{pluralSlug}}' => Str::plural(Str::slug($name)),
+            '{{pluralSnake}}' => Str::plural(Str::snake($name)),
+            '{{pluralClass}}' => Str::plural(Str::studly($name)),
             '{{singularCamel}}' => Str::singular(Str::camel($name)),
-            '{{singularSlug}}'  => Str::singular(Str::slug($name)),
+            '{{singularSlug}}' => Str::singular(Str::slug($name)),
             '{{singularSnake}}' => Str::singular(Str::snake($name)),
             '{{singularClass}}' => Str::singular(Str::studly($name)),
-            '{{namespace}}'     => $this->getNamespace(),
+            '{{namespace}}' => $this->getNamespace(),
         ];
     }
 
@@ -267,8 +277,6 @@ class RollbackMultiAuthCommand extends Command
      */
     protected function getNamespace()
     {
-        $namespace = Container::getInstance()->getNamespace();
-
-        return rtrim($namespace, '\\');
+        return app()->getNamespace();
     }
 }

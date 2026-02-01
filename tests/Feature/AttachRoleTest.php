@@ -15,8 +15,8 @@ class AttachRoleTest extends TestCase
     public function setup(): void
     {
         parent::setUp();
-        $this->super      = $this->loginSuperAdmin();
-        $this->editorRole = factory(Role::class)->create(['name' => 'editor']);
+        $this->super = $this->loginSuperAdmin();
+        $this->editorRole = Role::factory()->create(['name' => 'editor']);
     }
 
     /**
@@ -39,7 +39,7 @@ class AttachRoleTest extends TestCase
         $admin = $this->createAdmin();
         $this->post(route('admin.attach.roles', ['admin' => $admin->id, 'role' => $this->editorRole->id]))
             ->assertStatus(302)
-            ->assertRedirect('/admin/home');
+            ->assertRedirect(route('admin.login'));
     }
 
     /**
